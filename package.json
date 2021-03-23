@@ -49,7 +49,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xiweixiong/swagger-mocker"
+    "url": "git+https://github.com/xiweixiong/swagger-mocker.git"
   },
   "bugs": {
     "url": "https://github.com/xiweixiong/swagger-mocker/issues"
