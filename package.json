@@ -10,7 +10,7 @@
     "dev": "tsc -w",
     "test": "npm run build && node ./bin/index.js start",
     "build": "rm -rf lib && tsc",
-    "publish": "npm run build && nvm use npm && npm publish",
+    "publish": "npm run build && npm config set registry http://registry.npmjs.org && npm publish",
     "prepare": "husky install"
   },
   "files": [
