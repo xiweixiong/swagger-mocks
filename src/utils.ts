@@ -5,7 +5,8 @@ import * as prettier from 'prettier'
 import * as os from 'os'
 import { Mod } from './standard'
 
-export const CONFIG_FILE = 'mock-config.js'
+export const CONFIG_FILE = 'mocker-config.js'
+export const OUT_DIR = '.mocks'
 
 export class Origin {
   originUrl: string
@@ -40,7 +41,10 @@ export class RegexField {
 
 export class MockToolsConfig {
   origins: Array<Origin> = []
+  /** mock服务端口号 */
   port: number = 8080
+  /** 数组长度 */
+  arrayNum: number = 3
   prettierConfig: prettier.ResolveConfigOptions = {
     parser: 'babel',
     printWidth: 200,
@@ -59,6 +63,7 @@ export class MockToolsConfig {
     { fieldName: '\\w*image\\b', mockValue: '@image' },
     { fieldName: '\\w*mobile\\b', mockValue: '^1[3-9]\d{9}$' },
     { fieldName: '\\w*time\\b', mockValue: "@datetime('yyyy-MM-dd HH:mm:ss')" },
+    { fieldName: 'grantRole\\b', mockValue: (mock) => ['person','business'][mock('@integer(0, 1)')] },
   ]
 
   static createFromConfigPath(configPath: string) {
@@ -66,7 +71,7 @@ export class MockToolsConfig {
       const config = require(configPath) as MockToolsConfig
       return config
     } catch (e) {
-      throw new Error('mock-config.js is error')
+      throw new Error('mocker-config.js is error')
     }
   }
 }

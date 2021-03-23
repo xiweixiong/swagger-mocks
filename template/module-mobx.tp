@@ -1,7 +1,0 @@
-
-/** $moduleName$ 模块 store */
-const $moduleName$Store = {
-  
-}
-
-export default $moduleName$Store

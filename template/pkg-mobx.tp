@@ -1,8 +1,0 @@
-import { observable , action} from 'mobx'
-
-/** $pkgName$ 包 mobx */
-export class $pkgName$ {
-  
-}
-
-export default new $pkgName$()

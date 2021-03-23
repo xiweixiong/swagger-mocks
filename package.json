@@ -1,14 +1,14 @@
 {
   "name": "swagger-mocker",
-  "version": "1.0.0",
-  "description": "swagger文档mock服务",
+  "version": "0.0.1",
+  "description": "根据swagger文档生成mock数据，并启动http数据mock服务",
   "main": "lib/cmd.js",
   "bin": {
-    "mocker": "bin/init.js"
+    "mocker": "bin/index.js"
   },
   "scripts": {
     "dev": "tsc -w",
-    "test": "npm run build && node ./lib/cmd.js test",
+    "test": "npm run build && node ./bin/index.js start",
     "build": "rm -rf lib && tsc"
   },
   "files": [

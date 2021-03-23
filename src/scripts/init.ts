@@ -31,7 +31,7 @@ export async function generateMockConfig() {
       type: 'confirm',
       name: 'confirm',
       default: true,
-      message: `检测到已存在mock-config文件，继续生成将覆盖配置项，是否继续？`,
+      message: `检测到已存在mocker-config文件，继续生成将覆盖配置项，是否继续？`,
     })
 
     if (!result.confirm) {
@@ -48,13 +48,13 @@ export async function generateMockConfig() {
   debugLog.success('文件生成成功。')
 
   debugLog.info(`
-    其余配置项请参阅官方文档 https://github.com/alibaba/pont
+    其余配置项请参阅官方文档 https://github.com/xiweixiong/swagger-mocker#readme
   `)
 }
 
 function generateConfig(configPath: string, answers: any) {
   const { originUrl, port } = answers
-  const dirName = path.join(process.cwd(), '/mock-config.js')
+  const dirName = path.join(process.cwd(), '/mocker-config.js')
   let config = new MockToolsConfig()
   if (configPath) {
     config = MockToolsConfig.createFromConfigPath(configPath)

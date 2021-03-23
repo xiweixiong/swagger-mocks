@@ -11,7 +11,9 @@ const packageFilePath = path.join(__dirname, '..', 'package.json')
 const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, 'utf8'))
 const currentVersion = packageInfo.version
 
-program.version(currentVersion).usage('[命令] [配置项]')
+program.version(currentVersion).name('mocker').usage('<命令> [配置项]').addHelpCommand(false)
+
+program.description('根据swagger文档生成mock数据，并启动http服务')
 ;(async function () {
   try {
     program
@@ -24,14 +26,15 @@ program.version(currentVersion).usage('[命令] [配置项]')
     program
       .command('start')
       .description('启动mock服务')
-      .action(async () => {
+      .option('-f, --force', '强制加载远程文档', false)
+      .action(async ({ force }) => {
         const configPath = await lookForFiles(process.cwd(), CONFIG_FILE)
         if (!configPath) {
           console.log(chalk.red('请先运行init初始化配置'))
           return
         }
         const config = MockToolsConfig.createFromConfigPath(configPath)
-        MocksServer.getSingleInstance(config).run()
+        MocksServer.getSingleInstance(config).run(force)
       })
 
     program.parse(process.argv)

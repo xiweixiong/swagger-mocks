@@ -1,8 +1,10 @@
 import { Translator } from '../translate'
 import * as _ from 'lodash'
-import { hasChinese, MockToolsConfig } from '../utils'
+import * as path from 'path'
+import { hasChinese, MockToolsConfig, format, OUT_DIR } from '../utils'
 import { StandardDataSource } from '../standard'
 import * as axios from 'axios'
+import * as fs from 'fs-extra'
 
 export class OriginBaseReader {
   constructor(protected config: MockToolsConfig) {}
@@ -73,7 +75,7 @@ export class OriginBaseReader {
     this.report('远程数据获取成功！')
 
     // 存储源json文件
-    
+    this.saveSnapshot(data)
 
     return data
   }
@@ -85,18 +87,46 @@ export class OriginBaseReader {
 
       // 将数据源转换为标准数据源格式
       let remoteDataSource: StandardDataSource[] = data.map((v) => this.transform2Standard(v))
-      this.report('远程数据解析完毕!')
 
       // 对解析后的标准数据源进行校验
       remoteDataSource.forEach((v) => this.checkDataSource(v))
-      this.report('解析后数据校验完毕！')
-
-      this.report('远程对象创建完毕！')
 
       return remoteDataSource
     } catch (e) {
       throw new Error('读取远程接口数据失败！' + e.toString())
     }
+  }
+
+  async readLocal() {
+    this.report('读取本地数据中...')
+    const rootPath = process.cwd()
+    let snapshotPath = path.join(rootPath, OUT_DIR, this.snapshotFilename)
+    const localDataStr = await fs.readFile(snapshotPath, { encoding: 'utf8' })
+    this.report('读取本地完成')
+
+    return JSON.parse(localDataStr)
+  }
+
+  /** 读取本地快照文件 */
+  async readLocalData() {
+    try {
+      const data = await this.readLocal()
+
+      // 将数据源转换为标准数据源格式
+      let remoteDataSource: StandardDataSource[] = data.map((v) => this.transform2Standard(v))
+
+      // 对解析后的标准数据源进行校验
+      remoteDataSource.forEach((v) => this.checkDataSource(v))
+
+      return remoteDataSource
+    } catch (e) {
+      throw new Error('读取本地接口数据失败！' + e.toString())
+    }
+  }
+
+  async getDataSource() {
+    const data = this.existsSnapshot() ? await this.readLocalData() : await this.fetchRemoteData()
+    return data
   }
 
   protected checkDataSource(dataSource: StandardDataSource) {
@@ -124,5 +154,23 @@ export class OriginBaseReader {
 
       throw new Error(errMsg.join('\n'))
     }
+  }
+
+  snapshotFilename = 'api-snapshot.json'
+  /** 是否存在快照 */
+  existsSnapshot() {
+    const rootPath = process.cwd()
+    return fs.existsSync(path.join(rootPath, OUT_DIR, this.snapshotFilename))
+  }
+
+  /** 存储swagger文档快照 */
+  saveSnapshot(data: any[]) {
+    const str = format(JSON.stringify(data), { ...this.config.prettierConfig, parser: 'json' }) as string
+    const rootPath = process.cwd()
+    const snapshotPath = path.join(rootPath, OUT_DIR, this.snapshotFilename)
+    if (!fs.existsSync(path.join(rootPath, OUT_DIR))) {
+      fs.mkdirSync(path.join(rootPath, OUT_DIR))
+    }
+    fs.writeFileSync(snapshotPath, str, { encoding: 'utf-8' })
   }
 }

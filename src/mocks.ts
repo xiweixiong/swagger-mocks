@@ -8,7 +8,7 @@ import * as Mock from 'mockjs'
 import * as ts from 'typescript'
 import { SwaggerV2Reader } from './scripts/swagger'
 import { BaseClass, StandardDataSource, StandardDataType } from './standard'
-import { format, getIPAdress, lookForFiles, MockToolsConfig } from './utils'
+import { format, getIPAdress, lookForFiles, MockToolsConfig, OUT_DIR } from './utils'
 
 export class Mocks {
   constructor(private ds: StandardDataSource[], private config: MockToolsConfig) {}
@@ -57,12 +57,11 @@ export class Mocks {
 
     // 自定义字段正则匹配
     const customFields = this.config.customFields
-    
-    if (fieldName) {
-      const customField = customFields.find(v => new RegExp(v.fieldName.toLowerCase()).test(fieldName.toLowerCase()))
+    if (fieldName && !isDefsType && typeName !== 'Array') {
+      const customField = customFields.find((v) => new RegExp(v.fieldName.toLowerCase()).test(fieldName.toLowerCase()))
       if (customField) {
         if (typeof customField.mockValue === 'function') {
-          return `'${customField.mockValue()}'`
+          return `(${customField.mockValue})(Mock.mock)`
         } else {
           return `"${customField.mockValue}"`
         }
@@ -77,8 +76,8 @@ export class Mocks {
       return `defs[${dsIndex}].${defClass.name}(${typeArgs.map((arg) => this.getDefaultMocks(arg, dsIndex)).join(', ')})`
     } else if (typeName === 'Array') {
       if (typeArgs.length) {
-        const item = this.getDefaultMocks(typeArgs[0], dsIndex)
-        return `new Array(3).fill(null).map(() => (${item}))`
+        const item = this.getDefaultMocks(typeArgs[0], dsIndex, fieldName)
+        return `new Array(${this.config.arrayNum}).fill(null).map(() => (${item}))`
       }
       return '[]'
     } else if (typeName === 'string') {
@@ -123,6 +122,8 @@ export class Mocks {
     })
 
     return `
+      const Mock = require('mockjs')
+
       const defs = [
         ${codes.map((v) => `{ ${v.classes} }`).join(',')}
       ]
@@ -146,12 +147,12 @@ export class MocksServer {
   dataSources: Array<StandardDataSource> = []
 
   constructor(private config: MockToolsConfig) {
-    /** gitignore 添加忽略 .mocks 文件夹 */
+    /** gitignore 添加忽略 {OUT_DIR} 文件夹 */
     lookForFiles(process.cwd(), '.gitignore').then((igonrePath) => {
       if (igonrePath) {
         let ignoreContent = fs.readFileSync(igonrePath, 'utf8')
-        if (!ignoreContent.includes('.mocks')) {
-          ignoreContent = ignoreContent + '\n' + '.mocks/'
+        if (!ignoreContent.includes(OUT_DIR)) {
+          ignoreContent = ignoreContent + '\n' + `${OUT_DIR}/`
           fs.writeFileSync(igonrePath, ignoreContent)
         }
       }
@@ -169,21 +170,22 @@ export class MocksServer {
   }
 
   /** 检查是否存在mock数据文件 */
-  async checkMockData() {
-    this.dataSources = await new SwaggerV2Reader(this.config).fetchRemoteData()
+  async checkMockData(force?: boolean) {
+    const render = new SwaggerV2Reader(this.config)
+    this.dataSources = force ? await render.fetchRemoteData() : await render.getDataSource()
     const rootPath = process.cwd()
-    const mockPath = path.join(rootPath, '.mocks/mocks.ts')
+    const mockPath = path.join(rootPath, OUT_DIR, 'mocks.js')
     const code = await this.getMocksCode()
-    if (!fs.existsSync(path.join(rootPath, '.mocks'))) {
-      fs.mkdirSync(path.join(rootPath, '.mocks'))
+    if (!fs.existsSync(path.join(rootPath, OUT_DIR))) {
+      fs.mkdirSync(path.join(rootPath, OUT_DIR))
     }
     await fs.writeFile(mockPath, code)
   }
 
   async getCurrMocksData() {
     const rootPath = process.cwd()
-    const mockPath = path.join(rootPath, '.mocks')
-    const sourcePath = path.join(mockPath, 'mocks.ts')
+    const mockPath = path.join(rootPath, OUT_DIR)
+    const sourcePath = path.join(mockPath, 'mocks.js')
     const noCacheFix = (Math.random() + '').slice(2, 5)
     const jsPath = path.join(mockPath, `mocks.${noCacheFix}.js`)
     const code = fs.readFileSync(sourcePath, 'utf8')
@@ -220,10 +222,10 @@ export class MocksServer {
             mod.interfaces.forEach(async (inter) => {
               // 把 url int path 的参数，转换为匹配参数的正则表达式
               const reg = new RegExp('^' + inter.path.replace(/\//g, '\\/').replace(/{.+?}/g, '[0-9a-zA-Z_-]*?') + '(\\?|$)')
-
-              //  && req.method.toUpperCase() === inter.method.toUpperCase()
-              if (req.url.match(reg)) {
-                const wrapperRes = JSON.stringify(Mock.mock(mocksData[i][mod.name][inter.name]))
+              if (req.url.match(reg) && req.method.toUpperCase() === inter.method.toUpperCase()) {
+                const mockSrouce = mocksData[i][mod.name][inter.name]
+                const mockData = Mock.mock(mockSrouce)
+                const wrapperRes = JSON.stringify(mockData)
                 res.writeHead(200, {
                   'Content-Type': 'text/json;charset=UTF-8',
                   'Access-Control-Allow-Origin': '*',
@@ -239,9 +241,10 @@ export class MocksServer {
         res.end()
       })
       .listen(port, () => {
-        console.log(chalk.yellow('启动Mock服务 - '))
-        console.log(`  ${chalk.cyan(`http://${ip}:${port}`)}`)
-        console.log('按 Ctrl + C 停止服务')
+        console.log(chalk.yellow('\nMock服务已启动 \n'))
+        console.log(`  Local:           ${chalk.cyan(`http://localhost:${port}`)}`)
+        console.log(`  On Your Network: ${chalk.cyan(`http://${ip}:${port}`)}`)
+        console.log('\n按 Ctrl + C 停止服务\n')
         process.on('SIGINT', () => {
           server.close(() => {
             console.log(chalk.red('Mock服务已停止'))
@@ -257,8 +260,8 @@ export class MocksServer {
       })
   }
 
-  async run() {
-    await this.checkMockData()
+  async run(force?: boolean) {
+    await this.checkMockData(force)
     this.startServer()
   }
 }
