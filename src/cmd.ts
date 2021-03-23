@@ -36,6 +36,7 @@ program.description('根据swagger文档生成mock数据，并启动http服务')
         const config = MockToolsConfig.createFromConfigPath(configPath)
         MocksServer.getSingleInstance(config).run(force)
       })
+      
 
     program.parse(process.argv)
   } catch (e) {
