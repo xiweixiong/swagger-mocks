@@ -5,7 +5,7 @@ import * as prettier from 'prettier'
 import * as os from 'os'
 import { Mod } from './standard'
 
-export const CONFIG_FILE = 'mocker-config.js'
+export const CONFIG_FILE = 'mocks-config.js'
 export const OUT_DIR = '.mocks'
 
 export class Origin {
@@ -70,7 +70,7 @@ export class MockToolsConfig {
       const config = require(configPath) as MockToolsConfig
       return config
     } catch (e) {
-      throw new Error('mocker-config.js is error')
+      throw new Error('mocks-config.js is error')
     }
   }
 }
