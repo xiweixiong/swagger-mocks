@@ -48,7 +48,7 @@ export async function generateMockConfig() {
   debugLog.success('文件生成成功。')
 
   debugLog.info(`
-    其余配置项请参阅官方文档 https://github.com/xiweixiong/swagger-mocker#readme
+    其余配置项请参阅官方文档 https://github.com/xiweixiong/mock-swagger#readme
   `)
 }
 

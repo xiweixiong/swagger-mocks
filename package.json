@@ -1,5 +1,5 @@
 {
-  "name": "swagger-mocker",
+  "name": "mock-swagger",
   "version": "0.0.1",
   "description": "根据swagger文档生成mock数据，并启动http数据mock服务",
   "main": "lib/cmd.js",
@@ -49,13 +49,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xiweixiong/swagger-mocker.git"
+    "url": "git+https://github.com/xiweixiong/mock-swagger.git"
   },
   "bugs": {
-    "url": "https://github.com/xiweixiong/swagger-mocker/issues"
+    "url": "https://github.com/xiweixiong/mock-swagger/issues"
   },
-  "homepage": "https://github.com/xiweixiong/swagger-mocker#readme",
+  "homepage": "https://github.com/xiweixiong/mock-swagger#readme",
   "keywords": [
-    "swagger-mocker,swagger,mock"
+    "mock-swagger,mock,swagger"
   ]
 }
