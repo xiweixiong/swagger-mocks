@@ -1,6 +1,6 @@
 {
   "name": "mock-swagger",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "description": "根据swagger文档生成mock数据，并启动http数据mock服务",
   "main": "lib/cmd.js",
   "bin": {
@@ -8,9 +8,9 @@
   },
   "scripts": {
     "dev": "tsc -w",
-    "test": "npm run build && node ./bin/index.js start",
+    "test": "npm run build && node ./bin/index.js init",
     "build": "rm -rf lib && tsc",
-    "publish": "npm run build && npm config set registry http://registry.npmjs.org && npm publish",
+    "pub": "npm run build && npm config set registry http://registry.npmjs.org && npm publish",
     "prepare": "husky install"
   },
   "files": [

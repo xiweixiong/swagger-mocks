@@ -63,7 +63,6 @@ export class MockToolsConfig {
     { fieldName: '\\w*image\\b', mockValue: '@image' },
     { fieldName: '\\w*mobile\\b', mockValue: '^1[3-9]\d{9}$' },
     { fieldName: '\\w*time\\b', mockValue: "@datetime('yyyy-MM-dd HH:mm:ss')" },
-    { fieldName: 'grantRole\\b', mockValue: (mock) => ['person','business'][mock('@integer(0, 1)')] },
   ]
 
   static createFromConfigPath(configPath: string) {

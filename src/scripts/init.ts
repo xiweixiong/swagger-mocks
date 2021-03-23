@@ -2,7 +2,7 @@ import * as inquirer from 'inquirer'
 import * as path from 'path'
 import * as fs from 'fs-extra'
 import * as debugLog from '../debugLog'
-import { CONFIG_FILE, MockToolsConfig, lookForFiles, judgeIsVaildUrl, Origin } from '../utils'
+import { CONFIG_FILE, MockToolsConfig, lookForFiles, judgeIsVaildUrl, Origin, format } from '../utils'
 
 const promptList = [
   {
@@ -63,5 +63,9 @@ function generateConfig(configPath: string, answers: any) {
   const origins: Origin[] = (originUrl as string).split(',').map((v) => new Origin(v))
   config.origins = origins
   config.port = port
-  fs.writeFileSync(configPath || dirName, JSON.stringify(config, null, 2))
+  const configStr = `
+    module.exports = ${JSON.stringify(config)}
+  `
+  const formatStr = format(configStr, { ...config.prettierConfig, printWidth: 120 }) as string
+  fs.writeFileSync(configPath || dirName, formatStr)
 }
