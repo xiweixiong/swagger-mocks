@@ -1,6 +1,6 @@
 {
   "name": "swagger-mocks",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "根据swagger文档生成mock数据，并启动http数据mock服务",
   "main": "lib/cmd.js",
   "bin": {

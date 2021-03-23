@@ -1,7 +1,5 @@
 import * as fs from 'fs-extra'
-// import * as inquirer from 'inquirer'
 import * as path from 'path'
-import * as chalk from 'chalk'
 import * as http from 'http'
 import * as moment from 'moment'
 import * as Mock from 'mockjs'
@@ -9,6 +7,7 @@ import * as ts from 'typescript'
 import { SwaggerV2Reader } from './scripts/swagger'
 import { BaseClass, StandardDataSource, StandardDataType } from './standard'
 import { format, getIPAdress, lookForFiles, MockToolsConfig, OUT_DIR } from './utils'
+import { chalk } from './debugLog'
 
 export class Mocks {
   constructor(private ds: StandardDataSource[], private config: MockToolsConfig) {}

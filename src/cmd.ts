@@ -1,17 +1,16 @@
 import * as program from 'commander'
 import * as path from 'path'
 import * as fs from 'fs-extra'
-import * as chalk from 'chalk'
-
 import { generateMockConfig } from './scripts/init'
 import { lookForFiles, CONFIG_FILE, MockToolsConfig } from './utils'
 import { MocksServer } from './mocks'
+import { chalk } from './debugLog'
 
 const packageFilePath = path.join(__dirname, '..', 'package.json')
 const packageInfo = JSON.parse(fs.readFileSync(packageFilePath, 'utf8'))
 const currentVersion = packageInfo.version
 
-program.version(currentVersion).name('mocker').usage('<命令> [配置项]').addHelpCommand(false)
+program.version(currentVersion).name('mocks').usage('<命令> [配置项]').addHelpCommand(false)
 
 program.description('根据swagger文档生成mock数据，并启动http服务')
 ;(async function () {

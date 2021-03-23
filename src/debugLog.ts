@@ -1,5 +1,7 @@
-const chalk = require('chalk')
+const chalks = require('chalk')
 const log = console.log
+
+export const chalk = new chalks.Instance({ level: 1 })
 
 export function bindInfo(onLog) {
   return (message: string) => {
